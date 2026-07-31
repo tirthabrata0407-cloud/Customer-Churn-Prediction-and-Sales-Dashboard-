@@ -1,8 +1,14 @@
 import warnings
 import numpy as np
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
+
+try:
+    import plotly.express as px
+    import plotly.graph_objects as go
+except ImportError:
+    print("Error: plotly not installed. Run: pip install plotly")
+    raise
+
 import streamlit as st
 from sklearn.cluster import KMeans
 from sklearn.ensemble import RandomForestClassifier
@@ -223,7 +229,7 @@ elif app_mode == "Sales Trend Analysis":
         )
         st.plotly_chart(fig_bar, use_container_width=True)
 
-    with c2:
+    with col2:
         st.subheader("Sales Heatmap (Year x Month)")
         transactions_df["year"] = transactions_df["date"].dt.year
         transactions_df["month_num"] = transactions_df["date"].dt.month
