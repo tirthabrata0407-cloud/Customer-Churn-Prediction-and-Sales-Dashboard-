@@ -96,6 +96,18 @@ def load_data():
             }
         )
 
+    # Ensure we have a consistent customerID column name for downstream logic
+    if "customerID" not in customers.columns:
+        # Try common alternative column names
+        for alt in ["customerId", "customer_id", "id"]:
+            if alt in customers.columns:
+                customers = customers.rename(columns={alt: "customerID"})
+                break
+        else:
+            # If no suitable column exists, create synthetic customer IDs
+            customers = customers.reset_index(drop=True)
+            customers["customerID"] = [f"CUST-{1000 + i}" for i in range(len(customers))]
+
     # Load or generate transaction data
     try:
         transactions = pd.read_csv("transactions.csv")
