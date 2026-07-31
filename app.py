@@ -38,6 +38,7 @@ st.markdown("---")
 @st.cache_data
 def load_data():
     """Attempts to load custom files or generates synthetic data matching specifications."""
+    # Load or generate customers data
     try:
         customers = pd.read_csv("cleaned_customer_churn_dataset.csv")
     except Exception:
@@ -95,15 +96,17 @@ def load_data():
             }
         )
 
-    # Load / Generate Synthetic Transaction Data
+    # Load or generate transaction data
     try:
         transactions = pd.read_csv("transactions.csv")
         transactions["date"] = pd.to_datetime(transactions["date"])
     except Exception:
+        # Generate synthetic transaction data
         dates = pd.date_range(start="2025-01-01", end="2026-06-30", freq="D")
         n_tx = 3000
         tx_dates = np.random.choice(dates, size=n_tx)
-        tx_cust = np.random.choice(customers["customerID"], size=n_tx)
+        # Use the customers dataframe that was either loaded or generated above
+        tx_cust = np.random.choice(customers["customerID"].values, size=n_tx)
         tx_amount = np.round(
             np.random.exponential(scale=50, size=n_tx) + 10, 2
         )
