@@ -9,7 +9,7 @@ The Customer Churn Prediction and Sales Dashboard project leverages Data Analyti
 </div>
 
 ---
-🔗 **Live App:** [customer-churn-prediction-and-sales-dashboard-doneforzidio.streamlit.app](https://customer-churn-prediction-and-sales-dashboard-doneforzidio.streamlit.app)
+🔗 **Live App:** [customer-churn-prediction-and-sales-dashboard-doneforzidio.streamlit.app]((https://ekgqc5ertv8aibekdfrnis.streamlit.app/))
 
 ---
 
