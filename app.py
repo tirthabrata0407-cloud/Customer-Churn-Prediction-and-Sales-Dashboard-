@@ -15,6 +15,29 @@ from clustering import scale_features, kmeans_elbow, kmeans_fit, pca_2d, dbscan_
 
 st.set_page_config(page_title="Customer Churn Dashboard", layout="wide")
 
+# Minimal styling to make the app look cleaner and more professional
+st.markdown(
+    """
+    <style>
+    /* Page title style */
+    .main-title {
+        font-size: 30px;
+        font-weight: 700;
+        color: #0b3d91;
+        margin-bottom: 6px;
+    }
+    /* Subtle description style */
+    .subtle {
+        color: #6c757d;
+        margin-top: -8px;
+        margin-bottom: 12px;
+    }
+    /* Slightly reduce padding for main container for a dense dashboard feel */
+    .css-1d391kg {padding-top: 1rem;} /* streamlit class - may vary across versions */
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 @st.cache_resource
 def train_cached(X_train_s, y_train):
@@ -23,18 +46,18 @@ def train_cached(X_train_s, y_train):
 
 
 # ---------------- Load data ----------------
-st.sidebar.title("⚙️ Data Source")
-uploaded = st.sidebar.file_uploader("Upload a CSV (optional)", type=["csv"])
+st.sidebar.header("Data Source")
+uploaded = st.sidebar.file_uploader("Upload CSV file (optional)", type=["csv"])
 
 if uploaded is not None:
     df = load_data(uploaded)
-    st.sidebar.success("Using uploaded file.")
+    st.sidebar.success("Using uploaded dataset.")
 else:
     try:
         df = load_data(CSV_PATH)
-        st.sidebar.info(f"Using CSV_PATH: {CSV_PATH}")
+        st.sidebar.info(f"Using configured CSV_PATH: {CSV_PATH}")
     except FileNotFoundError:
-        st.error(f"Could not find '{CSV_PATH}'. Edit CSV_PATH in config.py or upload a CSV.")
+        st.error(f"Could not find the configured CSV_PATH: '{CSV_PATH}'. Edit CSV_PATH in config.py or upload a CSV file.")
         st.stop()
 
 if TARGET_COL not in df.columns:
@@ -43,12 +66,14 @@ if TARGET_COL not in df.columns:
 
 feature_cols = get_feature_columns(df, TARGET_COL)
 
+# Title and description
+st.markdown('<div class="main-title">Customer Churn Prediction & Sales Dashboard</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtle">Predict churn, compare models, and perform customer segmentation with visual analytics.</div>', unsafe_allow_html=True)
+
 page = st.sidebar.radio(
     "Navigate",
     ["Overview", "EDA", "Model Comparison", "Customer Segmentation", "Predict a Customer"],
 )
-
-st.title("📊 Customer Churn Prediction & Sales Dashboard")
 
 # ---------------- Overview ----------------
 if page == "Overview":
@@ -61,9 +86,8 @@ if page == "Overview":
     st.subheader("Summary Statistics")
     st.dataframe(df.describe(), width='stretch')
     st.info(
-        "This dataset has no transaction date/amount fields, so month-over-month "
-        "sales-trend analysis isn't available here — this dashboard covers churn "
-        "prediction and customer segmentation."
+        "This dataset does not include transaction date/amount fields, so time-series sales-trend analysis is not available. "
+        "The dashboard focuses on churn prediction and customer segmentation."
     )
 
 # ---------------- EDA ----------------
@@ -76,7 +100,7 @@ elif page == "EDA":
 
     st.subheader("Feature Distributions by Churn")
     num_cols = df[feature_cols].select_dtypes(include=np.number).columns.tolist()
-    chosen = st.multiselect("Pick numeric features", num_cols, default=num_cols[:3])
+    chosen = st.multiselect("Select numeric features to inspect", num_cols, default=num_cols[:3])
     for col in chosen:
         fig, ax = plt.subplots(figsize=(6, 3))
         sns.histplot(data=df, x=col, hue=TARGET_COL, bins=30, kde=True, ax=ax, palette="Set2")
@@ -89,16 +113,17 @@ elif page == "EDA":
 
 # ---------------- Model Comparison ----------------
 elif page == "Model Comparison":
-    st.subheader("Train & Compare Churn Models")
-    st.caption("Class imbalance is handled with class-weighting since churners are a small minority.")
+    st.subheader("Train and Compare Churn Models")
+    st.caption("Class imbalance is handled via class weighting where appropriate.")
 
     test_size = st.slider("Test set size", 0.1, 0.4, 0.2, 0.05)
     X_train_s, X_test_s, y_train, y_test, scaler = split_and_scale(df, feature_cols, TARGET_COL, test_size)
 
-    with st.spinner("Training models..."):
+    with st.spinner("Training models — this may take a moment..."):
         trained_models = train_cached(X_train_s, y_train)
         results_df, roc_data = evaluate_models(trained_models, X_test_s, y_test)
 
+    # display results
     st.dataframe(results_df.style.format({c: "{:.3f}" for c in results_df.columns[1:]}), width='stretch')
 
     st.subheader("ROC Curves")
@@ -112,7 +137,7 @@ elif page == "Model Comparison":
     st.pyplot(fig)
 
     st.subheader("Confusion Matrix")
-    chosen_model = st.selectbox("Choose a model", list(trained_models.keys()))
+    chosen_model = st.selectbox("Select a trained model", list(trained_models.keys()))
     cm, report = get_confusion_and_report(trained_models[chosen_model], X_test_s, y_test)
     fig, ax = plt.subplots(figsize=(4, 3))
     sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax)
@@ -121,13 +146,14 @@ elif page == "Model Comparison":
     st.pyplot(fig)
     st.text(report)
 
+    # persist required state for single prediction page
     st.session_state["scaler"] = scaler
     st.session_state["trained_models"] = trained_models
     st.session_state["feature_cols"] = feature_cols
 
 # ---------------- Customer Segmentation ----------------
 elif page == "Customer Segmentation":
-    st.subheader("Unsupervised Segmentation")
+    st.subheader("Unsupervised Customer Segmentation")
     X_s, scaler = scale_features(df, feature_cols)
 
     st.markdown("**K-Means — Elbow Method**")
@@ -154,32 +180,32 @@ elif page == "Customer Segmentation":
     st.dataframe(df_clusters.groupby("cluster")[TARGET_COL].agg(["mean", "count"]))
 
     st.markdown("---")
-    st.markdown("**DBSCAN — anomaly / outlier detection**")
+    st.markdown("**DBSCAN — anomaly and outlier detection**")
     eps = st.slider("eps", 0.1, 3.0, 0.8, 0.1)
     min_samples = st.slider("min_samples", 2, 20, 5)
     sample, db, n_outliers, n_clusters = dbscan_outliers(df, feature_cols, eps, min_samples)
-    st.write(f"Detected **{n_outliers}** outlier points out of {len(sample)} sampled rows "
-             f"(across {n_clusters} clusters).")
+    st.write(f"Detected **{n_outliers}** outlier points out of {len(sample)} sampled rows (across {n_clusters} clusters).")
 
 # ---------------- Predict a Customer ----------------
 elif page == "Predict a Customer":
     st.subheader("Score a Single Customer")
 
     if "trained_models" not in st.session_state:
-        st.warning("Go to the 'Model Comparison' page first to train the models.")
+        st.warning("Please train models on the 'Model Comparison' page before scoring individual records.")
         st.stop()
 
     trained_models = st.session_state["trained_models"]
     scaler = st.session_state["scaler"]
     feature_cols = st.session_state["feature_cols"]
 
-    model_choice = st.selectbox("Model to use", list(trained_models.keys()))
+    model_choice = st.selectbox("Model to use for scoring", list(trained_models.keys()))
 
-    st.markdown("**Enter customer details:**")
+    st.markdown("**Enter customer features below:**")
     input_vals = {}
     cols = st.columns(2)
     for i, col in enumerate(feature_cols):
         with cols[i % 2]:
+            # keep original behavior for binary vs continuous fields
             if df[col].nunique() <= 2 and set(df[col].unique()).issubset({0, 1}):
                 input_vals[col] = st.selectbox(col, [0, 1])
             else:
@@ -188,6 +214,6 @@ elif page == "Predict a Customer":
     if st.button("Predict Churn"):
         pred, prob = predict_single(trained_models[model_choice], scaler, input_vals, feature_cols)
         if pred == 1:
-            st.error(f"⚠️ Likely to churn — probability {prob:.1%}")
+            st.error(f"Likely to churn — estimated probability: {prob:.1%}")
         else:
-            st.success(f"✅ Likely to stay — churn probability {prob:.1%}")
+            st.success(f"Likely to stay — estimated churn probability: {prob:.1%}")
