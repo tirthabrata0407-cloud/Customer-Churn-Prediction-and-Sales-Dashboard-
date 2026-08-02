@@ -121,4 +121,4 @@ This app is deployed on **Streamlit Community Cloud**. Any push to the `main` br
 ##  Author
 
 **Tirtha Brata Das**
-- GitHub: [tirthabrata0407-cloud](https://github.com/tirthabrata0407-cloud))
+- GitHub: [tirthabrata0407-cloud](https://github.com/tirthabrata0407-cloud)
