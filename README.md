@@ -1,18 +1,19 @@
-# 📊 Customer Churn Prediction & Sales Dashboard
+#  Customer Churn Prediction & Sales Dashboard
 
-An interactive Streamlit dashboard that analyzes customer behavior, predicts churn using multiple machine learning models, and segments customers through clustering — built as a Data Analytics + ML project.
+The Customer Churn Prediction and Sales Dashboard project leverages Data Analytics and Machine Learning to analyze customer behavior, predict churn probability, and visualize sales trends. This system is essential for businesses, e-commerce platforms, and service providers to enhance customer retention and optimize sales strategies. 
 
+##  Project Overview
+
+<div align="center">
+  <img src="project_workflow.png" alt="project overview" width="100%" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+</div>
+
+---
 🔗 **Live App:** [customer-churn-prediction-and-sales-dashboard-doneforzidio.streamlit.app](https://customer-churn-prediction-and-sales-dashboard-doneforzidio.streamlit.app)
 
 ---
 
-## 📌 Project Overview
-
-This project leverages Data Analytics and Machine Learning to analyze customer behavior, predict churn probability, and visualize customer segments. It's designed for businesses and service providers to identify at-risk customers and improve retention strategies.
-
----
-
-## ✨ Features
+## Key Features
 
 - **Overview** — dataset snapshot, row/column counts, churn rate, summary statistics
 - **EDA (Exploratory Data Analysis)** — churn distribution, feature histograms by churn, correlation heatmap
@@ -40,7 +41,7 @@ This project leverages Data Analytics and Machine Learning to analyze customer b
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```
 churn/
@@ -74,7 +75,7 @@ Churn rate in this dataset is ~2%, making it a highly imbalanced classification 
 
 ---
 
-## 🚀 Running Locally
+##  Running Locally
 
 ### 1. Clone the repository
 ```bash
@@ -103,13 +104,13 @@ The app will open at `http://localhost:8501`.
 
 ---
 
-## ☁️ Deployment
+##  Deployment
 
 This app is deployed on **Streamlit Community Cloud**. Any push to the `main` branch automatically triggers a redeploy.
 
 ---
 
-## 📈 Future Improvements
+##  Future Improvements
 
 - Add sales-trend analysis if transaction/date/amount data becomes available
 - Add SMOTE/oversampling as an alternative to class-weighting
@@ -117,7 +118,7 @@ This app is deployed on **Streamlit Community Cloud**. Any push to the `main` br
 
 ---
 
-## 👤 Author
+##  Author
 
-**Lahari Gadamsetty**
-- GitHub: [@laharisetty29](https://github.com/laharisetty29)
+**Tirtha Brata Das**
+- GitHub: [tirthabrata0407-cloud](https://github.com/tirthabrata0407-cloud))
